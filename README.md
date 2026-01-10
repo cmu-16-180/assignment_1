@@ -13,7 +13,8 @@ In this assignment, you will build the "eyes" for a robotic search-and-rescue tu
 * Thresholding and Binary Masks.
 * Visual Servoing (controlling a robot based on camera feedback).
 
-## 2. The ScenarioYou are provided with a simulation of a Pan-Tilt Turret equipped with a camera.
+## 2. The Scenario
+You are provided with a simulation of a Pan-Tilt Turret equipped with a camera.
 
 * **The Target:** A Glowing Red Sphere (The Beacon).
 * **The Distractors:** The environment contains "false positives" to trick your algorithm:
