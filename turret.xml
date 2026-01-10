@@ -1,0 +1,65 @@
+<mujoco>
+  <option timestep="0.005" gravity="0 0 -9.81"/>
+  
+  <visual>
+    <global offwidth="640" offheight="480"/>
+  </visual>
+
+  <asset>
+    <texture type="skybox" builtin="gradient" rgb1="0.1 0.1 0.1" rgb2="0 0 0" width="512" height="512"/>
+    <texture name="grid" type="2d" builtin="checker" width="512" height="512" rgb1=".2 .2 .3" rgb2=".3 .3 .4"/>
+    <material name="grid" texture="grid" texrepeat="1 1" texuniform="true" reflectance="0"/>
+    <material name="glow_red" rgba="1 0 0 1" emission="1"/>
+  </asset>
+
+  <worldbody>
+    <light pos="0 0 5" dir="0 0 -1" directional="true"/>
+    <geom name="floor" type="plane" size="5 5 0.1" material="grid"/>
+
+    <!-- THE ROBOT TURRET -->
+    <body name="turret_base" pos="0 0 0">
+        <geom type="cylinder" size=".1 .05" rgba=".5 .5 .5 1"/>
+        
+        <!-- Pan Link (Rotate Left/Right) -->
+        <body name="pan_link" pos="0 0 .1">
+            <joint name="pan" type="hinge" axis="0 0 1" damping="0.5" limited="true" range="-1.5 1.5"/>
+            <geom type="capsule" fromto="0 0 0 0 0 .2" size=".04" rgba=".8 .8 .8 1" mass="1"/>
+            
+            <!-- Tilt Link (Rotate Up/Down) -->
+            <body name="tilt_link" pos="0 0 .2">
+                <joint name="tilt" type="hinge" axis="0 1 0" damping="0.5" limited="true" range="-0.5 0.5"/>
+                <geom type="box" size=".05 .02 .02" rgba=".8 .8 .8 1" mass="0.5"/>
+                
+                <!-- THE CAMERA -->
+                <camera name="eye" pos="0.1 0 0" euler="90 270 0" fovy="45"/>
+                <geom type="cylinder" fromto="0 0 0 0.1 0 0" size=".03" rgba="0.1 0.1 0.1 1" mass="0.2"/> 
+            </body>
+        </body>
+    </body>
+
+    <!-- THE TARGET (Glowing Red Sphere) -->
+    <body name="target" pos="2 0 0.2">
+        <joint type="slide" axis="1 0 0"/> 
+        <joint type="slide" axis="0 1 0"/> 
+        <geom type="sphere" size="0.15" material="glow_red"/> 
+    </body>
+
+    <!-- DISTRACTORS -->
+    <body name="distractor1" pos="2.5 1 0.2">
+        <geom type="box" size="0.15 0.15 0.15" rgba="0.6 0 0 1"/> 
+    </body>
+    <body name="distractor2" pos="1.5 -1 0.2">
+        <geom type="sphere" size="0.15" rgba="1 0.5 0 1"/> 
+    </body>
+    <body name="distractor3" pos="3 0.5 0.2">
+        <geom type="box" size="0.1 0.1 0.4" rgba="0.1 0.1 0.1 1"/> 
+    </body>
+
+  </worldbody>
+
+  <actuator>
+    <!-- Position servos for stability -->
+    <position joint="pan" kp="50"/>
+    <position joint="tilt" kp="50"/>
+  </actuator>
+</mujoco>
