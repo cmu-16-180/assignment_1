@@ -30,9 +30,33 @@ def find_target(image):
     # 3. Find contours or centroids (moments)
     # 4. Return the center
     
-    # Placeholder: Just returns the center of the screen so the code runs
-    height, width, _ = image.shape
-    return (width // 2, height // 2)
+    # Convert from RGB to HSV for better color segmentation
+    hsv = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
+
+    # Define color range for the "Glowing Red" target
+    lower_red = np.array([0, 100, 100])  # Lower bound of red in HSV
+    upper_red = np.array([10, 255, 255])  # Upper bound of red in HSV
+    mask1 = cv2.inRange(hsv, lower_red, upper_red)
+
+    lower_red2 = np.array([160, 100, 100])  # Lower bound of red in HSV (for higher hue values)
+    upper_red2 = np.array([180, 255, 255])  # Upper bound of red in HSV
+    mask2 = cv2.inRange(hsv, lower_red2, upper_red2)
+
+    # Combine masks
+    mask = mask1 | mask2
+
+    # Find contours in the mask
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    if contours:
+        # Find the largest contour
+        largest_contour = max(contours, key=cv2.contourArea)
+        M = cv2.moments(largest_contour)
+        if M['m00'] != 0:
+            cx = int(M['m10'] / M['m00'])
+            cy = int(M['m01'] / M['m00'])
+            return (cx, cy)
+    return (None, None)
 
 # -----------------------------------------------------------------------------
 # SEPARATE PROCESS: GUI WORKER
