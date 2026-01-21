@@ -1,0 +1,176 @@
+<mujoco model="two_diffdrive_robots">
+
+  <compiler angle="radian" coordinate="local" inertiafromgeom="true"/>
+  <option timestep="0.002" gravity="0 0 -9.81" integrator="RK4"/>
+  <size njmax="2000" nconmax="500"/>
+
+  <default>
+    <geom contype="1" conaffinity="1"
+          friction="1.0 0.005 0.0001"
+          solref="0.002 1"
+          solimp="0.95 0.99 0.001"
+          density="400"/>
+    <joint damping="0.1" armature="0.001"/>
+  </default>
+
+  <!-- =======================
+       ASSETS
+       ======================= -->
+  <asset>
+    <!-- Shiny checkered texture -->
+    <texture
+        name="checker_tex"
+        type="2d"
+        builtin="checker"
+        width="512"
+        height="512"
+        rgb1="0.95 0.95 0.95"
+        rgb2="0.15 0.15 0.15"/>
+
+    <!-- Shiny checker material -->
+    <material
+        name="shiny_checker"
+        texture="checker_tex"
+        texrepeat="12 12"
+        reflectance="0.4"
+        shininess="0.9"
+        specular="0.8"/>
+
+    <!-- Robot materials -->
+    <material name="ghost" rgba="0.20 0.60 1.00 0.45"/>
+    <material name="solid" rgba="1.00 0.35 0.20 1.00"/>
+    <material name="dark"  rgba="0.15 0.15 0.15 1.00"/>
+  </asset>
+
+  <worldbody>
+
+    <!-- =======================
+         FLOOR (SHINY CHECKERED)
+         ======================= -->
+    <geom
+        name="floor"
+        type="plane"
+        pos="0 0 0"
+        size="30 30 0.1"
+        material="shiny_checker"
+        friction="1.0 0.005 0.0001"/>
+
+    <!-- =====================================================
+         GROUND TRUTH ROBOT (GHOSTED, SLIGHTLY RAISED)
+         ===================================================== -->
+    <body name="robot_gt" pos="0 0 0.15">
+      <freejoint/>
+
+      <!-- Chassis -->
+      <geom name="gt_chassis" type="box"
+            pos="0 0 0.05"
+            size="0.16 0.12 0.05"
+            material="ghost"/>
+
+      <!-- Heading arrow -->
+      <geom name="gt_heading" type="capsule"
+            fromto="0 0 0.11 0.30 0 0.11"
+            size="0.01"
+            material="ghost"/>
+
+      <!-- Left wheel -->
+      <body name="gt_wheel_left" pos="0  0.10 0.05">
+        <joint type="hinge" axis="0 1 0"/>
+        <geom type="cylinder"
+              size="0.10 0.02"
+              euler="1.570796 0 0"
+              material="ghost"
+              density="600"/>
+      </body>
+
+      <!-- Right wheel -->
+      <body name="gt_wheel_right" pos="0 -0.10 0.05">
+        <joint type="hinge" axis="0 1 0"/>
+        <geom type="cylinder"
+              size="0.10 0.02"
+              euler="1.570796 0 0"
+              material="ghost"
+              density="600"/>
+      </body>
+
+      <!-- Passive caster -->
+      <body name="gt_caster_mount" pos="-0.14 0 0.03">
+        <joint type="hinge" axis="0 0 1"/>
+
+        <!-- fork -->
+        <geom type="box"
+              pos="0 0 0.02"
+              size="0.02 0.02 0.02"
+              material="ghost"/>
+
+        <body name="gt_caster_wheel" pos="0 0 0">
+          <joint type="hinge" axis="0 1 0"/>
+          <geom type="cylinder"
+                size="0.03 0.015"
+                euler="1.570796 0 0"
+                material="ghost"
+                friction="0.6 0.002 0.00005"
+                density="600"/>
+        </body>
+      </body>
+    </body>
+
+    <!-- =====================================================
+         ESTIMATED ROBOT (SOLID)
+         ===================================================== -->
+    <body name="robot_est" pos="0 0 0.12">
+      <freejoint/>
+
+      <geom name="est_chassis" type="box"
+            pos="0 0 0.05"
+            size="0.16 0.12 0.05"
+            material="solid"/>
+
+      <geom name="est_heading" type="capsule"
+            fromto="0 0 0.11 0.30 0 0.11"
+            size="0.01"
+            material="solid"/>
+
+      <!-- Left wheel -->
+      <body name="est_wheel_left" pos="0  0.10 0.05">
+        <joint type="hinge" axis="0 1 0"/>
+        <geom type="cylinder"
+              size="0.10 0.02"
+              euler="1.570796 0 0"
+              material="dark"
+              density="600"/>
+      </body>
+
+      <!-- Right wheel -->
+      <body name="est_wheel_right" pos="0 -0.10 0.05">
+        <joint type="hinge" axis="0 1 0"/>
+        <geom type="cylinder"
+              size="0.10 0.02"
+              euler="1.570796 0 0"
+              material="dark"
+              density="600"/>
+      </body>
+
+      <!-- Passive caster -->
+      <body name="est_caster_mount" pos="-0.14 0 0.03">
+        <joint type="hinge" axis="0 0 1"/>
+
+        <geom type="box"
+              pos="0 0 0.02"
+              size="0.02 0.02 0.02"
+              material="dark"/>
+
+        <body name="est_caster_wheel" pos="0 0 0">
+          <joint type="hinge" axis="0 1 0"/>
+          <geom type="cylinder"
+                size="0.03 0.015"
+                euler="1.570796 0 0"
+                material="dark"
+                friction="0.6 0.002 0.00005"
+                density="600"/>
+        </body>
+      </body>
+    </body>
+
+  </worldbody>
+</mujoco>
