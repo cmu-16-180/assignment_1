@@ -6,7 +6,9 @@
   </visual>
 
   <asset>
-    <texture type="skybox" builtin="gradient" rgb1="0.1 0.1 0.1" rgb2="0 0 0" width="512" height="512"/>
+    <!-- <texture type="skybox" builtin="gradient" rgb1="0.1 0.1 0.1" rgb2="0 0 0" width="512" height="512"/> -->
+    <!-- <texture type="skybox" builtin="gradient" rgb1="0.2 0.6 1.0" rgb2="0.8 0.9 1.0" width="32" height="512"/> -->
+    <texture type="skybox" file="skybox_cube.png" gridsize="3 4" gridlayout=".U..LFRB.D.."/>
     <texture name="grid" type="2d" builtin="checker" width="512" height="512" rgb1=".2 .2 .3" rgb2=".3 .3 .4"/>
     <material name="grid" texture="grid" texrepeat="1 1" texuniform="true" reflectance="0"/>
     <material name="glow_red" rgba="1 0 0 1" emission="1"/>

@@ -121,7 +121,7 @@ def main():
     parser.add_argument(
     "--npz",
     type=str,
-    default="assets/ps1_encoderData.npz",
+    default="assignment_1/assets/ps1_encoderData.npz",
     help="Path to encoder + GT data (.npz)"
     )
     args = parser.parse_args()

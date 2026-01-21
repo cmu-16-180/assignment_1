@@ -180,17 +180,17 @@ def main():
     parser.add_argument(
     "--npz",
     type=str,
-    default="assets/ps1_encoderData.npz",
+    default="assignment_1/assets/ps1_encoderData.npz",
     help="Path to encoder + GT data (.npz)"
     )
     parser.add_argument(
     "--xml",
     type=str,
-    default="assets/two_robots_diffdrive.xml",
+    default="assignment_1/assets/two_robots_diffdrive.xml",
     help="Path to MuJoCo XML"
     )
     parser.add_argument("--rate", type=int, default=50, choices=[2, 10, 50])
-    parser.add_argument("--realtime", action="store_true")
+    parser.add_argument("--realtime", action=argparse.BooleanOptionalAction, default=True)
     parser.add_argument("--plots", action="store_true")
 
     # Visualization noise toggles (NOT for grading)

@@ -5,67 +5,18 @@ import time
 import cv2 
 import multiprocessing
 import queue 
-
-# -----------------------------------------------------------------------------
-# STUDENT SECTION: EDIT THIS FUNCTION
-# -----------------------------------------------------------------------------
-def find_target(image):
-    """
-    Process the image to find the target (Glowing Red Sphere).
-    
-    Args:
-        image: A numpy array of shape (Height, Width, 3) representing RGB pixels.
-    
-    Returns:
-        (cx, cy): The (x, y) pixel coordinates of the center of the target.
-                  Return (None, None) if no target is found.
-    """
-    
-    # TIP: Convert from RGB to HSV for better color segmentation
-    # hsv = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
-    
-    # ------------------ YOUR CODE HERE ------------------
-    # 1. Define color range for the "Glowing Red" target
-    # 2. Threshold the image
-    # 3. Find contours or centroids (moments)
-    # 4. Return the center
-    
-    # Convert from RGB to HSV for better color segmentation
-    hsv = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
-
-    # Define color range for the "Glowing Red" target
-    lower_red = np.array([0, 100, 100])  # Lower bound of red in HSV
-    upper_red = np.array([10, 255, 255])  # Upper bound of red in HSV
-    mask1 = cv2.inRange(hsv, lower_red, upper_red)
-
-    lower_red2 = np.array([160, 100, 100])  # Lower bound of red in HSV (for higher hue values)
-    upper_red2 = np.array([180, 255, 255])  # Upper bound of red in HSV
-    mask2 = cv2.inRange(hsv, lower_red2, upper_red2)
-
-    # Combine masks
-    mask = mask1 | mask2
-
-    # Find contours in the mask
-    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-    if contours:
-        # Find the largest contour
-        largest_contour = max(contours, key=cv2.contourArea)
-        M = cv2.moments(largest_contour)
-        if M['m00'] != 0:
-            cx = int(M['m10'] / M['m00'])
-            cy = int(M['m01'] / M['m00'])
-            return (cx, cy)
-    return (None, None)
+import submission_turret as student
 
 # -----------------------------------------------------------------------------
 # SEPARATE PROCESS: GUI WORKER
 # -----------------------------------------------------------------------------
-def run_debug_window(image_queue, stop_event):
+def run_debug_window(image_queue, result_queue, stop_event):
     """
     Runs in a separate process. Loops until 'stop_event' is set.
     """
-    window_name = "Robot Camera Feed (Debug Process)"
+    window_name = "Robot Camera Feed"
+
+    student.enable_visualization()
     
     try:
         # Create window explicitly to allow property checking
@@ -76,10 +27,16 @@ def run_debug_window(image_queue, stop_event):
                 # Wait for a new frame with a VERY short timeout
                 # This ensures we check for ESC/Close events rapidly
                 frame = image_queue.get(timeout=0.01)
+
+                cx, cy = student.find_target(frame)
                 
                 # Convert RGB (MuJoCo) -> BGR (OpenCV)
                 bgr_frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-                
+
+                if cx is not None and cy is not None:
+                    result_queue.put((cx, cy))
+                    cv2.circle(bgr_frame, (int(cx), int(cy)), 10, (0, 255, 0), 2)
+
                 # Show the window
                 cv2.imshow(window_name, bgr_frame)
                 
@@ -124,22 +81,24 @@ def main():
     # --- MULTIPROCESSING SETUP ---
     debug_process = None
     image_queue = None
+    result_queue = None
     stop_event = None
     
     if ENABLE_VISION_DEBUG:
         image_queue = multiprocessing.Queue(maxsize=2)
+        result_queue = multiprocessing.Queue(maxsize=2)
         stop_event = multiprocessing.Event()
         
         # Pass the stop_event to the child process
         debug_process = multiprocessing.Process(
             target=run_debug_window, 
-            args=(image_queue, stop_event)
+            args=(image_queue, result_queue, stop_event)
         )
         debug_process.daemon = True 
         debug_process.start()
         print("Debug Window: LAUNCHED (Separate Process)")
 
-    xml_path = "assignment_1/turret.xml"
+    xml_path = "assignment_1/assets/turret.xml"
     model = mujoco.MjModel.from_xml_path(xml_path)
     data = mujoco.MjData(model)
 
@@ -174,10 +133,17 @@ def main():
                 rgb_image = renderer.render()
 
                 # 3. RUN STUDENT CODE
-                cx, cy = find_target(rgb_image)
+                if debug_process.is_alive():
+                    if not image_queue.full():
+                        debug_image = rgb_image.copy()
+                        image_queue.put(debug_image)
+                else:
+                    stop_event.set()
 
                 # 4. VISUAL SERVOING
-                if cx is not None and cy is not None:
+                try:
+                    cx, cy = result_queue.get_nowait()
+
                     screen_center_x = 640 / 2
                     screen_center_y = 480 / 2
                     
@@ -189,22 +155,24 @@ def main():
 
                     current_pan = np.clip(current_pan, -1.5, 1.5)
                     current_tilt = np.clip(current_tilt, -0.5, 0.5)
+                except queue.Empty:
+                    pass
 
                 data.ctrl[0] = current_pan
                 data.ctrl[1] = current_tilt
 
-                # 5. SEND TO DEBUG WINDOW
-                if ENABLE_VISION_DEBUG and (frame_count % 2 == 0):
-                    if debug_process.is_alive():
-                        if not image_queue.full():
-                            debug_image = rgb_image.copy()
-                            if cx is not None and cy is not None:
-                                cv2.circle(debug_image, (int(cx), int(cy)), 10, (0, 255, 0), 2)
+                # # 5. SEND TO DEBUG WINDOW
+                # if ENABLE_VISION_DEBUG and (frame_count % 2 == 0):
+                #     if debug_process.is_alive():
+                #         if not image_queue.full():
+                #             debug_image = rgb_image.copy()
+                #             if cx is not None and cy is not None:
+                #                 cv2.circle(debug_image, (int(cx), int(cy)), 10, (0, 255, 0), 2)
                             
-                            image_queue.put(debug_image)
-                    else:
-                        # Process died unexpectedly
-                        stop_event.set()
+                #             image_queue.put(debug_image)
+                #     else:
+                #         # Process died unexpectedly
+                #         stop_event.set()
 
                 # 6. RENDER SIMULATION
                 viewer.sync()
