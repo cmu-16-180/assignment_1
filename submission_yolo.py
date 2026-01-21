@@ -46,3 +46,4 @@ def detect_objects(renderer, data):
     # display_img = TODO
 
     # return display_img, results
+    return None, None # TODO: replace with your return value
