@@ -8,7 +8,6 @@ import shutil
 import re
 from submission_yolo import detect_objects
 
-# --- 1. Filter and Select 10 Objects ---
 objects_folder = "assignment_1/assets/objects"
 coco_class_names = [
     'person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 'train', 'truck', 'boat', 'traffic light',
@@ -25,7 +24,6 @@ coco_class_names = [
 available_objects = [d for d in os.listdir(objects_folder) if os.path.isdir(os.path.join(objects_folder, d))]
 coco_available_objects = [obj for obj in available_objects if obj in coco_class_names]
 
-# Select 10 objects (or all available if less than 10)
 num_to_select = min(len(coco_available_objects), 10)
 selected_object_names = random.sample(coco_available_objects, num_to_select)
 selected_objects = [{"name": name, "path": os.path.join(objects_folder, name), "coco_class": name} for name in selected_object_names]
@@ -34,10 +32,10 @@ selected_objects = [{"name": name, "path": os.path.join(objects_folder, name), "
 def build_xml_with_objects(selected_objects):
     xml_parts = []
     xml_parts.append('<?xml version="1.0" ?>')
-    xml_parts.append('<mujoco model="turret_fast_drop">')
+    xml_parts.append('<mujoco model="turret_ultra_fast_drop">')
     
-    # INCREASED GRAVITY for fast falling
-    xml_parts.append('  <option timestep="0.005" gravity="0 0 -30"/>')
+    # PHYSICS BOOST: Gravity set to -60 and Timestep to 0.001 for high-speed stability
+    xml_parts.append('  <option timestep="0.001" gravity="0 0 -60"/>')
     xml_parts.append('  <compiler meshdir="assignment_1/assets/objects"/>')
     xml_parts.append('  <visual><global offwidth="1280" offheight="960"/></visual>')
     
@@ -61,31 +59,28 @@ def build_xml_with_objects(selected_objects):
     
     xml_parts.append('  <worldbody>')
     xml_parts.append('    <light pos="0 0 5" dir="0 0 -1" directional="true"/>')
-    xml_parts.append('    <geom name="floor" type="plane" size="10 10 0.1" material="grid" friction="1 0.05 0.01"/>')
+    xml_parts.append('    <geom name="floor" type="plane" size="10 10 0.1" material="grid" friction="1 0.05 0.01" solimp="0.9 0.95 0.001" solref="0.02 1"/>')
     
-    # Turret with CAMERA LOOKING DOWN
+    # Turret
     xml_parts.append('    <body name="turret_base" pos="0 0 0">')
     xml_parts.append('        <geom type="cylinder" size=".1 .05" rgba=".5 .5 .5 1"/>')
     xml_parts.append('        <body name="pan_link" pos="0 0 .1">')
     xml_parts.append('            <joint name="pan" type="hinge" axis="0 0 1" damping="0.5" limited="true" range="-1.5 1.5"/>')
     xml_parts.append('            <geom type="capsule" fromto="0 0 0 0 0 .2" size=".04" rgba=".8 .8 .8 1" mass="1"/>')
     xml_parts.append('            <body name="tilt_link" pos="0 0 .2">')
-    # Tilt limited to look downward. Range is in radians (approx -45 to 0 degrees)
     xml_parts.append('                <joint name="tilt" type="hinge" axis="0 1 0" damping="0.5" limited="true" range="-0.8 0.2"/>')
     xml_parts.append('                <geom type="box" size=".05 .02 .02" rgba=".8 .8 .8 1" mass="0.5"/>')
-    # Camera euler adjusted to tilt slightly more toward the ground
     xml_parts.append('                <camera name="eye" pos="0.1 0 0" euler="90 285 0" fovy="45"/>')
     xml_parts.append('                <geom type="cylinder" fromto="0 0 0 0.1 0 0" size=".03" rgba="0.1 0.1 0.1 1" mass="0.2"/>')
     xml_parts.append('            </body>')
     xml_parts.append('        </body>')
     xml_parts.append('    </body>')
     
-    # SCATTERED OBJECTS (10 objects in front)
     for idx, obj in enumerate(selected_objects):
         obj_name = obj["name"]
         row, col = idx // 3, idx % 3
-        x, y = 1.2 + row * 0.8, (col - 1) * 0.7
-        z = 4.0 + random.uniform(0, 1.5)
+        x, y = 1.5 + row * 1.2, (col - 1) * 1.2
+        z = 2.0 + random.uniform(0, 0.5) 
         
         xml_parts.append(f'    <body name="obj_{obj_name}" pos="{x} {y} {z}">')
         xml_parts.append('        <freejoint/>') 
@@ -96,22 +91,16 @@ def build_xml_with_objects(selected_objects):
         if os.path.exists(body_file):
             with open(body_file, 'r') as f:
                 content = f.read()
-                # Look for the visual mesh AND its rgba value
-                # This pattern finds a geom with a mesh and optionally grabs the rgba attribute
                 geom_match = re.search(r'<geom[^>]*mesh="([^"]+)"[^>]*rgba="([^"]+)"', content)
-                
                 if geom_match:
-                    mesh_ref = geom_match.group(1)
-                    rgba_val = geom_match.group(2)
+                    mesh_ref, rgba_val = geom_match.group(1), geom_match.group(2)
                     xml_parts.append(f'        <geom type="mesh" mesh="{obj_name}_{mesh_ref}" rgba="{rgba_val}" mass="1.0"/>')
                     visual_mesh_loaded = True
                 else:
-                    # Fallback for geoms that have a mesh but no explicit RGBA in the same tag
                     mesh_only_match = re.search(r'<geom[^>]*mesh="([^"]+)"', content)
                     if mesh_only_match:
                         mesh_ref = mesh_only_match.group(1)
-                        # Assign a random color if none found to make them distinct
-                        rand_color = f"{random.random():.1f} {random.random():.1f} {random.random():.1f} 1.0"
+                        rand_color = f"{random.random():.2f} {random.random():.2f} {random.random():.2f} 1.0"
                         xml_parts.append(f'        <geom type="mesh" mesh="{obj_name}_{mesh_ref}" rgba="{rand_color}" mass="1.0"/>')
                         visual_mesh_loaded = True
 
@@ -129,24 +118,19 @@ model = mujoco.MjModel.from_xml_string(xml_string)
 data = mujoco.MjData(model)
 renderer = mujoco.Renderer(model, height=960, width=1280)
 
-# Set initial tilt to look down slightly
 tilt_joint_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, "tilt")
-data.qpos[model.jnt_qposadr[tilt_joint_id]] = -0.3 # Negative looks down
+data.qpos[model.jnt_qposadr[tilt_joint_id]] = -0.3
 
 try:
     with mujoco.viewer.launch_passive(model, data) as viewer:
         while viewer.is_running():
-            # Step the simulation
             mujoco.mj_step(model, data)
-            
-            # Sync renderer for YOLO
             renderer.update_scene(data, camera="eye")
             display_img, results = detect_objects(renderer, data)
-            
             viewer.sync()
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
 except Exception as e:
-    print(f"Error: {e}")
+    print(f"Simulation stopped: {e}")
 
 cv2.destroyAllWindows()
