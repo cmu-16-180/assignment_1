@@ -14,9 +14,9 @@ You should see an `assignment_1` folder where you do your work.
 
 **Important!** When working on this assignment, make sure that the virtual environment is active. You should see `(venv)` at the beginning of each prompt line on your terminal. See the setup guide if it is not active.
 
-## Problem 1 (30 Points): CMU Robotics Self-Guided Tour 
+## Problem 1 (25 Points): CMU Robotics Self-Guided Tour 
 
-There are some places on comapus where you can learn about the history of robotics at CMU. The [Robotics PRoject](https://library.cmu.edu/university-archives/initiatives/robotics-project) has a website archive and a physical exhibit in the Hunt Library. You can also wander the hallways of Newell Simon Hall, where you will find many photos of CMU robots, and even some old robots and components on display.  
+There are some places on comapus where you can learn about the history of robotics at CMU. The [Robotics Project](https://library.cmu.edu/university-archives/initiatives/robotics-project) has a website archive and a physical exhibit in the Hunt Library. You can also wander the hallways of Newell Simon Hall, where you will find many photos of CMU robots, and even some old robots and components on display.  
 
 As you explore these places, take **selfies with at least three different robots** that have distinct applications. For each robot, describe its design, application, and how sensing contributes to its operation. Identify the sensors in each robot and explain their role in enabling the robot's functionality.
 
@@ -24,7 +24,7 @@ After writing about all the robots you encountered, conclude your essay by choos
 
 Your essay for all parts above should be (300 - 500 words).
 
-## Problem 2 (30 Points): Dead Reckoning
+## Problem 2 (25 Points): Dead Reckoning
 
 In this problem, you will implement dead reckoning to estimate the position of a differential drive robot given measurements from the wheel encoders.  The robot consists of two drive wheels on a single axis and a passive caster wheel for balance. The key parameters of the robot are as follows:
 
@@ -54,7 +54,7 @@ After you're happy with your implementation, run the autograder to check that yo
 * Windows `python assignment_1\autograder_dead_reckoning.py`
 * MacOS `python assignment_1/autograder_dead_reckoning.py` (Note: you do **not** need mjpython for the autograder since it does not use Mujoco)
 
-## Problem 3 (30 Points): RGB Color Segmentation
+## Problem 3 (25 Points): RGB Color Segmentation
 
 In this problem, you will build the "eyes" for a robotic search-and-rescue turret. The robot is mechanically capable of moving (pan/tilt), but it is currently blind. Your job is to write a computer vision algorithm that locates a specific "Beacon" in a cluttered environment so the robot can lock onto it.
 
@@ -119,3 +119,25 @@ You know you are done when:
     * *The robot shakes violently:* Your vision code might be jumping between the target and a distractor. Check your thresholds.
     * *The Camera Window is black/frozen:* Check the terminal for errors. Ensure you aren't stuck in an infinite loop inside find_target.
     
+## Problem 4 (25 Points): YOLO searching
+
+YOLO (You Only Look Once) is a very popular neural-network based object detection system. Simply put: you provide it an image, and it gives you an estimate (or "prediction") of where objects are. There is a big caveat though: it only knows how to find objects that were in its training set. 
+
+What you're going to do is use YOLO to find objects of interest (oddly, "sports ball" are of main interest, but not the only thing). You will download a trained YOLO model, and use it on an image, then process the results.
+
+Run this:
+* Windows: `python assignment_1\main_yolo.py`
+* MacOS: `mjpython assignment_1/main_yolo.py`
+
+What you should see is a bunch of random object fall in front of the camera.
+
+### Step 1: run the YOLO model on the image
+
+Update `solution_yolo.py` to run YOLO on the model, an then ask it to annotate the image for you. Once you return the annotated image, you'll see detection boxes with class names and confidence levels on them.
+
+### Step 2: find the target object
+
+Update your solution to search through the YOLO results to find the object of interest (see `solution_yolo.py` comments for details). While testing your implementation, we recommend printing the results you find. Your final task is to return the results so that the autograder passes.
+
+* Windows: `python assignment_1\autograder_yolo.py`
+* MacOS: `mjpython assignment_1/autograder_yolo.py`
