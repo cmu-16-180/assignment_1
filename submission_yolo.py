@@ -14,12 +14,15 @@ def load_yolo_model():
             model_path = os.path.join(os.path.dirname(__file__), 'assets', 'yolov8n.pt')
             yolo_model = YOLO(model_path)  # Automatically downloads if not present
             print("✓ Model loaded successfully!")
+            # help(yolo_model.__call__)
+            # print(yolo_model)
         except Exception as e:
             print(f"Error loading YOLO model: {e}")
             print("Make sure you have an internet connection to download the model.")
             raise
+    return yolo_model
 
-def detect_objects(renderer, data):
+def detect_objects(img, target_name="sports ball"):
     """
     Render the scene, detect objects using YOLO, and display the results.
     
@@ -28,22 +31,43 @@ def detect_objects(renderer, data):
         data: Mujoco data
     """
     # Render from camera for YOLO detection
-    renderer.update_scene(data, camera="eye")
-    # img = TODO
     
-    # Convert BGR to RGB
-    # img_rgb = TODO
+    # load the yolo model    
+    yolo_model = load_yolo_model()
     
-    # Run YOLO detection
-    # TODO: Load YOLO Model
-    # results = TODO: YOLO Model results on img_rgb
-    # annotated_img = TODO: results rendered on img_rgb
+    # TODO: Use the yolo_model to run YOLO detection
     
-    # Convert back to BGR for OpenCV display
-    # annotated_img_bgr = TODO
-    
-    # Display the annotated image in a separate window (resized for better visibility)
-    # display_img = TODO
+    yolo_results = None # TODO: YOLO Model results on img
 
-    # return display_img, results
-    return None, None # TODO: replace with your return value
+    # TODO: once you have this running, make sure you return it, you'll
+    # start seeing the results in the window.
+    annotated_img = None # TODO: results rendered on img
+
+    # TODO: process results, look for a detections with the class name 
+    # target_name (default "sports ball")
+    # Fill in search_results with the confidence, and box center
+    # E.g., if there is a "sports ball" with confidence 0.23 centered
+    # at pixel (50, 60), the search_results should contain an entry
+    #    (0.23, (50, 60))
+    # Thus if you had multiple search results, you might end up with
+    # a search_results that looks like this:
+    #    search_results = [
+    #        (0.23, (50, 60)),
+    #        (0.75, (23, 44)),
+    #         ...
+    #    ]
+    search_results = []
+
+    # for r in yolo_results:
+    #    # see https://docs.ultralytics.com/modes/predict/#boxes for details
+    #    # Note: r.names is a list that is indexed by result class
+    #    r.boxes.cls is a list of all class indexes (they're floats, so you'll need to cast to int to index into r.names)
+    #    r.boxes.conf is a list of all confidences levels
+    #    r.boxes.xyxy is a list of all boxes in xyxy format
+    #    r.boxes.xywh is a list of all boxes in xywh format
+    #    Hint: use search_results.append((conf, (x, y))) once you have it
+
+    
+    # return annotated_img, results
+    return annotated_img, search_results # TODO: replace with your return value
+
