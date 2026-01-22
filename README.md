@@ -118,7 +118,13 @@ You know you are done when:
 * **Troubleshooting:**
     * *The robot shakes violently:* Your vision code might be jumping between the target and a distractor. Check your thresholds.
     * *The Camera Window is black/frozen:* Check the terminal for errors. Ensure you aren't stuck in an infinite loop inside find_target.
-    
+
+### Autograder
+
+After you're happy with your implementation, run the autograder to check that you haven't missed anything critical. This is the same autograder tests that we will run for grading.
+* Windows `python assignment_1\autograder_turret.py`
+* MacOS `python assignment_1/autograder_turret.py`
+
 ## Problem 4 (25 Points): YOLO searching
 
 YOLO (You Only Look Once) is a very popular neural-network based object detection system. Simply put: you provide it an image, and it gives you an estimate (or "prediction") of where objects are. There is a big caveat though: it only knows how to find objects that were in its training set. 
@@ -133,11 +139,14 @@ What you should see is a bunch of random object fall in front of the camera.
 
 ### Step 1: run the YOLO model on the image
 
-Update `solution_yolo.py` to run YOLO on the model, an then ask it to annotate the image for you. Once you return the annotated image, you'll see detection boxes with class names and confidence levels on them.
+Update `submission_yolo.py` to run YOLO on the model, an then ask it to annotate the image for you. Once you return the annotated image, you'll see detection boxes with class names and confidence levels on them.
 
 ### Step 2: find the target object
 
-Update your solution to search through the YOLO results to find the object of interest (see `solution_yolo.py` comments for details). While testing your implementation, we recommend printing the results you find. Your final task is to return the results so that the autograder passes.
+Update your solution to search through the YOLO results to find the object of interest (see `submission_yolo.py` comments for details). While testing your implementation, we recommend printing the results you find. Your final task is to return the results so that the autograder passes.
 
+### Autograder
+
+After you're happy with your implementation, run the autograder to check that you haven't missed anything critical. This is the same autograder tests that we will run for grading.
 * Windows: `python assignment_1\autograder_yolo.py`
 * MacOS: `mjpython assignment_1/autograder_yolo.py`
