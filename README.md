@@ -32,11 +32,11 @@ In this problem, you will implement dead reckoning to estimate the position of a
 - **Distance between the centers of the two drive wheels:** 0.2 m
 - **Encoder resolution:** 4096 ticks per revolution
 
-Do you work in `assignment_1/submission_dead_reckoning.py`.
+Do you work in `assignment_1/dead_reckoning_submission.py`.
 
 To get started, run:
-* Windows: `python assignment_1\main_dead_reckoning.py`
-* MacOS: `mjpython assignment_1/main_dead_reckoning.py`
+* Windows: `python assignment_1\dead_reckoning_main.py`
+* MacOS: `mjpython assignment_1/dead_reckoning_main.py`
 
 You should see two differential drive cars. One will move, and the other will stay still. The one that moves is the "real" robot's motion. The one that does not move is your computed **dead reckoning** estimate of where the robot actually is--your job is to compute this based on the wheel encoder readings.
 
@@ -51,8 +51,8 @@ Once your `ticks2vel` method is implemented, your next task is to convert these 
 ### Autograder
 
 After you're happy with your implementation, run the autograder to check that you haven't missed anything critical. This is the same autograder tests that we will run for grading.
-* Windows `python assignment_1\autograder_dead_reckoning.py`
-* MacOS `python assignment_1/autograder_dead_reckoning.py` (Note: you do **not** need mjpython for the autograder since it does not use Mujoco)
+* Windows `python assignment_1\dead_reckoning_autograder.py`
+* MacOS `python assignment_1/dead_reckoning_autograder.py` (Note: you do **not** need mjpython for the autograder since it does not use Mujoco)
 
 ## Problem 3 (25 Points): RGB Color Segmentation
 
@@ -75,8 +75,8 @@ You are provided with a simulation of a Pan-Tilt Turret equipped with a camera.
 
 ### Run the Simulation
 Open VS Code, activate your virtual environment, and run:
-* Windows/Linux: `python assignment_1\main_turret.py`
-* MacOS: `mjpython assignment_1/main_turret.py`
+* Windows/Linux: `python assignment_1\turret_main.py`
+* MacOS: `mjpython assignment_1/turret_main.py`
 
 What to Expect
 * **Two Windows:** You should see two windows appear:
@@ -87,7 +87,7 @@ What to Expect
 * **Initial Behavior:** The robot will likely stare at the center of the room or drift aimlessly. This is normal! You haven't written the vision code yet.
 
 ### Your Task
-Open `assignment_1/submission_turret.py` in VS Code, and edit the function `find_target(image)`.
+Open `assignment_1/turret_submission.py` in VS Code, and edit the function `find_target(image)`.
 ```
 def find_target(image):
     # image is a (480, 640, 3) numpy array of RGB pixels
@@ -132,21 +132,19 @@ YOLO (You Only Look Once) is a very popular neural-network based object detectio
 What you're going to do is use YOLO to find objects of interest (oddly, "sports ball" are of main interest, but not the only thing). You will download a trained YOLO model, and use it on an image, then process the results.
 
 Run this:
-* Windows: `python assignment_1\main_yolo.py`
-* MacOS: `mjpython assignment_1/main_yolo.py`
+* Windows: `python assignment_1\yolo_main.py`
+* MacOS: `mjpython assignment_1/yolo_main.py`
 
 What you should see is a bunch of random object fall in front of the camera.
 
 ### Step 1: run the YOLO model on the image
 
-Update `submission_yolo.py` to run YOLO on the model, an then ask it to annotate the image for you. Once you return the annotated image, you'll see detection boxes with class names and confidence levels on them.
+Update `yolo_submission.py` to run YOLO on the model, an then ask it to annotate the image for you. Once you return the annotated image, you'll see detection boxes with class names and confidence levels on them.
 
 ### Step 2: find the target object
 
-Update your solution to search through the YOLO results to find the object of interest (see `submission_yolo.py` comments for details). While testing your implementation, we recommend printing the results you find. Your final task is to return the results so that the autograder passes.
-
-### Autograder
+Update your solution to search through the YOLO results to find the object of interest (see `yolo_submission.py` comments for details). While testing your implementation, we recommend printing the results you find. Your final task is to return the results so that the autograder passes.
 
 After you're happy with your implementation, run the autograder to check that you haven't missed anything critical. This is the same autograder tests that we will run for grading.
-* Windows: `python assignment_1\autograder_yolo.py`
-* MacOS: `mjpython assignment_1/autograder_yolo.py`
+* Windows: `python assignment_1\yolo_autograder.py`
+* MacOS: `mjpython assignment_1/yolo_autograder.py`
